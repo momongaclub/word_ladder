@@ -14,17 +14,20 @@ class Word():
         return self.word[LAST]
 
     def convert_simple_word(self):
-        self.word = re.compile(['ぁ'-'ゎ'], self.word)
+        #self.word = re.match([ぁ-ゎ], self.word)
+        print(self.word)
         # TODO カタカナ変換, 長音記号変換
         return self.word
 
     def get_word(self):
         self.word = input('言葉を入力して下さい: ')
-        self.words_log.append(self.word)
+
+    def append_words_log(self, word):
+        self.words_log.append(word)
 
     def judge_word(self):
-        # TODO 一度使ってないか,  前の単語としりとりが成立しているか
-        if self.word[LAST] == 'ん':
+        # TODO 前の単語としりとりが成立しているか
+        if self.word[LAST] == 'ん' or self.word in self.words_log:
             return False
         else:
             return True
@@ -40,11 +43,11 @@ class Dictionary():
                 self.dict[line] = line[0]
                 
     def get_answer_word(self, last_char):
-        # TODO 被らないように考慮する必要あり
         for word, top in self.dict.items():
             if top == last_char:
                 return word
         return LOSE
+
 
 def main():
     word = Word()
@@ -54,10 +57,14 @@ def main():
         word.get_word()
         if word.judge_word() == False:
             print(LOSE)
+            return
+        word.append_words_log(word.word)
+        word.convert_simple_word()
         answer = dictionary.get_answer_word(word.get_last_char())
+        print(answer)
         if answer == LOSE:
-            print(LOSE)
-    return
+            return
+        word.append_words_log(answer)
 
 if __name__ == '__main__':
     main()
