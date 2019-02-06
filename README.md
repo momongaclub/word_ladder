@@ -1,1 +1,2 @@
-# word_ladder
+# word_ladder  
+しりとりをするプログラム
