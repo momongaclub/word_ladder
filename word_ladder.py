@@ -14,6 +14,16 @@ KANA_STR_CODE = -96
 SMALL_STR_CODE = 1
 
 
+def convert_word(before_word, WORDS, STR_CODE):
+    word = ""
+    for w in before_word:
+        if re.match(WORDS, w):
+            w = ord(w) + STR_CODE
+            w = chr(w)
+        word += w
+    return word
+
+
 class Word():
 
     words_log = []
@@ -26,24 +36,10 @@ class Word():
 
     def convert_simple_word(self):
         self.word = self.word.rstrip('ー')
+        self.word = convert_word(self.word, KANA_WORDS, KANA_STR_CODE)
+        self.word = convert_word(self.word, SMALL_WORDS, SMALL_STR_CODE)
 
-        word = ""
-        for w in self.word:
-            if re.match(KANA_WORDS, w):
-                w = ord(w) + KANA_STR_CODE
-                w = chr(w)
-            word += w
-        self.word = word
-
-        word = ""
-        for w in self.word:
-            if re.match(SMALL_WORDS, w):
-                w = ord(w) + SMALL_STR_CODE
-                w = chr(w)
-            word += w
-        self.word = word
-
-    def get_word(self):
+   def get_word(self):
         self.word = input('言葉を入力して下さい: ')
 
     def append_words_log(self, word):
@@ -83,7 +79,6 @@ def main():
         me.get_word()
         print(ME + me.word)
         me.convert_simple_word()
-        print(me.word)
         if me.judge_word() == LOSE:
             print(ME + LOSE)
             break
