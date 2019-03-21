@@ -1,4 +1,4 @@
-import sys
+import argparse
 import re
 
 WIN = '勝ち'
@@ -14,22 +14,29 @@ KANA_STR_CODE = -96
 SMALL_STR_CODE = 1
 
 
-def convert_word(before_word, WORDS, STR_CODE):
+def parser():
+    parser = argparse.ArgumentParser(description='Process some integers')
+    parser.add_argument('word_dictionary', help='word_dictionary')
+    args = parser.parse_args()
+    return args
+
+
+def convert_word(before_word, words, str_code):
     word = ""
     for w in before_word:
-        if re.match(WORDS, w):
-            w = ord(w) + STR_CODE
+        if re.match(words, w):
+            w = ord(w) + str_code
             w = chr(w)
         word += w
     return word
 
 
-class Word():
-
+class Player():
     words_log = []
 
     def __init__(self):
         self.word = ''
+        self.lose = False
 
     def get_last_char(self):
         return self.word[LAST]
@@ -38,19 +45,24 @@ class Word():
         self.word = self.word.rstrip('ー')
         self.word = convert_word(self.word, KANA_WORDS, KANA_STR_CODE)
         self.word = convert_word(self.word, SMALL_WORDS, SMALL_STR_CODE)
-
-   def get_word(self):
+        
+    def get_word(self):
         self.word = input('言葉を入力して下さい: ')
 
     def append_words_log(self, word):
         self.words_log.append(word)
 
     def judge_word(self):
-        if self.word[LAST] == NG_WORD or self.word in Word.words_log:
-            return LOSE
-        elif Word.words_log:
-            if Word.words_log[LAST][LAST] != self.word[FIRST]:
-                return LOSE
+        if self.word[LAST] == NG_WORD or self.word in Player.words_log:
+            self.lose = True
+            print('lose')
+        elif Player.words_log:
+            if Player.words_log[LAST][LAST] != self.word[FIRST]:
+                self.lose = True
+                print('lose')
+
+    def __str__(self):
+        return "word:" + self.word
 
 
 class Dictionary():
@@ -71,24 +83,21 @@ class Dictionary():
 
 
 def main():
-    me = Word()
-    opponent = Word()
+    args = parser()
+    me = Player()
+    opponent = Player()
     dictionary = Dictionary()
-    dictionary.load_dictionary(sys.argv[1])
-    while(True):
+    dictionary.load_dictionary(args.word_dictionary)
+    while(me.lose!=True and opponent.lose!=True):
         me.get_word()
-        print(ME + me.word)
+        print(me)
         me.convert_simple_word()
-        if me.judge_word() == LOSE:
-            print(ME + LOSE)
-            break
+        me.judge_word()
         me.words_log.append(me.word)
         opponent.word = dictionary.get_answer_word(me.get_last_char())
-        print(OPPONENT + opponent.word)
+        print(opponent)
         opponent.convert_simple_word()
-        if opponent.judge_word() == LOSE:
-            print(OPPONENT + LOSE)
-            break
+        opponent.judge_word()
         opponent.words_log.append(opponent.word)
 
 
